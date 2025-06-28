@@ -9,9 +9,11 @@ import NoteDialog from './NoteDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { SortOption } from '@/types';
+import { NotesSearchFilters } from './NotesSearchFilters';
+import { Badge } from '@/components/ui/badge';
 
 const NoteListPageClient: React.FC = () => {
-  const { notes, isLoading, sortOption, setSortOption } = useNotes();
+  const { filteredNotes, isLoading, sortOption, setSortOption, searchTerm, selectedTagFilter } = useNotes();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   if (isLoading) {
@@ -24,6 +26,9 @@ const NoteListPageClient: React.FC = () => {
     );
   }
   
+  // Check if we are filtering or searching
+  const isFiltering = searchTerm || selectedTagFilter;
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -48,15 +53,36 @@ const NoteListPageClient: React.FC = () => {
         </div>
       </div>
 
-      {notes.length === 0 ? (
+      {/* Search and filter controls */}
+      <NotesSearchFilters />
+
+      {/* Results status if filtering is active */}
+      {isFiltering && (
+        <div className="flex items-center justify-between">
+          <Badge variant="secondary" className="text-sm">
+            {filteredNotes.length} {filteredNotes.length === 1 ? 'result' : 'results'} found
+          </Badge>
+        </div>
+      )}
+
+      {filteredNotes.length === 0 ? (
         <div className="text-center py-10 border-2 border-dashed border-muted rounded-lg">
           <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <p className="text-xl font-medium text-muted-foreground">No notes yet.</p>
-          <p className="text-muted-foreground">Click "New Note" to get started!</p>
+          {isFiltering ? (
+            <>
+              <p className="text-xl font-medium text-muted-foreground">No matching notes found.</p>
+              <p className="text-muted-foreground">Try adjusting your search or filters.</p>
+            </>
+          ) : (
+            <>
+              <p className="text-xl font-medium text-muted-foreground">No notes yet.</p>
+              <p className="text-muted-foreground">Click "New Note" to get started!</p>
+            </>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {notes.map(note => (
+          {filteredNotes.map(note => (
             <NoteListItem key={note.id} note={note} />
           ))}
         </div>

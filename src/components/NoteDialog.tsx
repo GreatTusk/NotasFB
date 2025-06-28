@@ -18,14 +18,23 @@ const NoteDialog: React.FC<NoteDialogProps> = ({ isOpen, onOpenChange, noteToEdi
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (values: { title?: string; content?: string }) => {
+  const handleSubmit = async (values: { title?: string; content?: string; tags: string[] }) => {
     setIsSubmitting(true);
     try {
       if (noteToEdit) {
-        updateNote({ ...noteToEdit, title: values.title || '', content: values.content || '' });
+        updateNote({
+          ...noteToEdit,
+          title: values.title || '',
+          content: values.content || '',
+          tags: values.tags
+        });
         toast({ title: "Note Updated", description: "Your note has been successfully updated." });
       } else {
-        addNote({ title: values.title || '', content: values.content || '' });
+        addNote({
+          title: values.title || '',
+          content: values.content || '',
+          tags: values.tags
+        });
         toast({ title: "Note Created", description: "Your new note has been successfully created." });
       }
       onOpenChange(false); // Close dialog on success
